@@ -13,7 +13,7 @@ import (
 func main() {
 	r := mux.NewRouter()
 	handler := func(w http.ResponseWriter, r *http.Request) {
-		rand.Seed(time.Now().UnixNano())
+		rand.New(rand.NewSource(time.Now().UnixNano()))
 		fmt.Fprintf(w, "{data:{number:%d}}", rand.Intn(100))
 	}
 	r.HandleFunc("/", handler)
