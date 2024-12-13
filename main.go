@@ -5,6 +5,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -12,14 +13,28 @@ import (
 
 func main() {
 	r := mux.NewRouter()
-	handler := func(w http.ResponseWriter, r *http.Request) {
-		rand.New(rand.NewSource(time.Now().UnixNano()))
-		fmt.Fprintf(w, "{data:{number:%d}}", rand.Intn(100))
+
+	r.HandleFunc("/", randomNumberHandler)
+	r.HandleFunc("/healthcheck", healthcheckHandler)
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "80"
 	}
-	r.HandleFunc("/", handler)
+
 	s := &http.Server{
-		Addr:    ":80",
+		Addr:    ":" + port,
 		Handler: r,
 	}
+
 	log.Fatal(s.ListenAndServe())
+}
+
+func randomNumberHandler(w http.ResponseWriter, r *http.Request) {
+	rand.New(rand.NewSource(time.Now().UnixNano()))
+	fmt.Fprintf(w, "{data:{number:%d}}", rand.Intn(100))
+}
+
+func healthcheckHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "{data:{status:ok}}")
 }
